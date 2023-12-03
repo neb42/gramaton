@@ -1,0 +1,32 @@
+.series-panel {
+  flex: 1;
+  height: 100%;
+
+  & h2 {
+    margin: 0;
+    padding: 0.5rem;
+  }
+}
+
+.series-list {
+  padding: 0;
+  margin: 0;
+}
+
+.series-list-item {
+  list-style: none;
+  padding: 1rem;
+  border-bottom: 1px solid #fff;
+  cursor: pointer;
+  color: rgba(255,255,255,.7);
+
+  &:hover {
+    background-color: #298eea;
+    color: #fff;
+  }
+
+  &.active {
+    background-color: #298eea;
+    color: #fff;
+  }
+}
