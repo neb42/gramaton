@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Episode } from '../../types';
+import { Episode, MessageType } from '../../types';
 
 import './EpisodeList.css';
 
@@ -9,19 +9,31 @@ type Props = {
   nextEpisode: Episode | null;
   currentEpisode: Episode | null;
   buildEpisodeUrl: (episode: Episode) => string;
+  markEpisodeWatched: (episode: Episode) => void;
+  markEpisodeUnwatched: (episode: Episode) => void;
+  removeSeries: () => void;
 };
 
-const EpisodeListItem = ({ episode, buildEpisodeUrl }: { episode: Episode, buildEpisodeUrl: Props['buildEpisodeUrl']  }) => {
+type EpisodeListItemProps = {
+  episode: Episode;
+} & Pick<Props, 'buildEpisodeUrl' | 'markEpisodeWatched' | 'markEpisodeUnwatched'>;
+
+const EpisodeListItem = ({
+  episode,
+  buildEpisodeUrl,
+  markEpisodeWatched,
+  markEpisodeUnwatched,
+}: EpisodeListItemProps) => {
   const Progress = () => {
-    if (episode.progress.current === 0) {
+    if (episode.progress.finished) {
       return (
-        <span className='episode-progress-0'>Not watched</span>
+        <span className='episode-progress-100'>Watched</span>
       );
     }
 
-    if (episode.progress.current >= (episode.progress.total * 0.95)) {
+    if (episode.progress.current === 0) {
       return (
-        <span className='episode-progress-100'>Watched</span>
+        <span className='episode-progress-0'>Not watched</span>
       );
     }
 
@@ -34,11 +46,27 @@ const EpisodeListItem = ({ episode, buildEpisodeUrl }: { episode: Episode, build
     return null;
   };
 
+  const handleMarkEpisodeWatched = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    markEpisodeWatched(episode);
+  };
+
+  const handleMarkEpisodeUnwatched = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    markEpisodeUnwatched(episode);
+  };
+
   return (
     <a href={buildEpisodeUrl(episode)} target='_blank' rel='noopener noreferrer'>
       <li className='episode-list-item'>
-        <span>{episode.episode}. {episode.title}</span>
-        <Progress />
+          <span>{episode.season}.{episode.episode}. {episode.title}</span>
+          <Progress />
+        <div className="episode-list-item-actions">
+          <button onClick={handleMarkEpisodeWatched}>Watched</button>
+          <button onClick={handleMarkEpisodeUnwatched}>Unwatched</button>
+        </div>
       </li>
     </a>
   );
@@ -49,7 +77,11 @@ export const EpisodeListComponent: React.FC<Props> = ({
   nextEpisode,
   currentEpisode,
   buildEpisodeUrl,
+  markEpisodeWatched,
+  markEpisodeUnwatched,
+  removeSeries,
 }) => {
+  const commonListItemProps = { buildEpisodeUrl, markEpisodeWatched, markEpisodeUnwatched };
   return (
     <div className='episode-panel'>
       <div className='episode-list'>
@@ -57,7 +89,7 @@ export const EpisodeListComponent: React.FC<Props> = ({
           <details className='season-list-item' open={true}>
             <summary>Last watched</summary>
             <ul className='episode-list'>
-              <EpisodeListItem episode={currentEpisode} buildEpisodeUrl={buildEpisodeUrl} />
+              <EpisodeListItem episode={currentEpisode} {...commonListItemProps} />
             </ul>
           </details>
         )}
@@ -65,20 +97,51 @@ export const EpisodeListComponent: React.FC<Props> = ({
           <details className='season-list-item' open={true}>
             <summary>Next Episode</summary>
             <ul className='episode-list'>
-              <EpisodeListItem episode={nextEpisode} buildEpisodeUrl={buildEpisodeUrl} />
+              <EpisodeListItem episode={nextEpisode} {...commonListItemProps} />
+            </ul>
+          </details>
+        )}
+        {!nextEpisode && (
+          <details className='season-list-item' open={true}>
+            <summary>Next Episode</summary>
+            <ul className='episode-list'>
+              <li className='episode-list-item-buttons'>
+                <a
+                  href={buildEpisodeUrl({
+                    ...episodes[episodes.length - 1][episodes[episodes.length - 1].length - 1],
+                    episode: episodes[episodes.length - 1][episodes[episodes.length - 1].length - 1].episode + 1,
+                  })}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  Check next episode
+                </a>
+                <a
+                  href={buildEpisodeUrl({
+                    ...episodes[episodes.length - 1][episodes[episodes.length - 1].length - 1],
+                    episode: 1,
+                    season: episodes[episodes.length - 1][episodes[episodes.length - 1].length - 1].season + 1,
+                  })}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  Check next season
+                </a>
+              </li>
             </ul>
           </details>
         )}
         {episodes.map((season, seasonIndex) => (
-          <details key={seasonIndex} className='season-list-item' open={false}>
+          <details className='season-list-item' open={false}>
             <summary>Season {seasonIndex + 1}</summary>
             <ul className='episode-list'>
               {season.map((episode, episodeIndex) => (
-                <EpisodeListItem key={episodeIndex} episode={episode} buildEpisodeUrl={buildEpisodeUrl} />
+                <EpisodeListItem key={episodeIndex} episode={episode} {...commonListItemProps} />
               ))}
             </ul>
           </details>
         ))}
+        <button className="remove-series" onClick={removeSeries}>Remove series</button>
       </div>
     </div>
   );

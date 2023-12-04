@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { EpisodeListComponent } from './EpisodeList.component';
 import { useSelectedMedia } from '../state';
-import { Episode, MediaType } from '../../types';
+import { Episode, MediaType, MessageType } from '../../types';
 
 type Props = {
 
@@ -16,8 +16,6 @@ export const EpisodeListContainer: React.FC<Props> = ({}) => {
   }
 
   const lastWatchedEpisode = selectedMedia.episodes[selectedMedia.lastWatched[0] - 1][selectedMedia.lastWatched[1] - 1];
-
-  const finishedLastWatchedEpisode = lastWatchedEpisode.progress.current >= (lastWatchedEpisode.progress.total * 0.95);
 
   const nextEpisode = (() => {
     const nEpisodesInSeason = selectedMedia.episodes[lastWatchedEpisode.season - 1].length;
@@ -35,12 +33,46 @@ export const EpisodeListContainer: React.FC<Props> = ({}) => {
 
   const buildEpisodeUrl = (episode: Episode) => `${selectedMedia.url}?season=${episode.season}&episode=${episode.episode}`;
 
+  const markEpisodeWatched = (episode: Episode) => {
+    chrome.runtime.sendMessage({
+      type: MessageType.EpisodeWatched,
+      payload: {
+        series: selectedMedia,
+        season: episode.season,
+        episode: episode.episode,
+      },
+    });
+  };
+
+  const markEpisodeUnwatched = (episode: Episode) => {
+    chrome.runtime.sendMessage({
+      type: MessageType.EpisodeUnwatched,
+      payload: {
+        series: selectedMedia,
+        season: episode.season,
+        episode: episode.episode,
+      },
+    });
+  };
+
+  const handleRemoveSeries = () => {
+    chrome.runtime.sendMessage({
+      type: MessageType.RemoveSeries,
+      payload: {
+        series: selectedMedia,
+      },
+    });
+  }
+
   return (
     <EpisodeListComponent
       episodes={selectedMedia.episodes}
       nextEpisode={nextEpisode}
-      currentEpisode={finishedLastWatchedEpisode ? null : lastWatchedEpisode}
+      currentEpisode={lastWatchedEpisode.progress.finished ? null : lastWatchedEpisode}
       buildEpisodeUrl={buildEpisodeUrl}
+      markEpisodeWatched={markEpisodeWatched}
+      markEpisodeUnwatched={markEpisodeUnwatched}
+      removeSeries={handleRemoveSeries}
     />
   );
 };

@@ -1,6 +1,10 @@
 export enum MessageType {
   PersistSeries = 'persist-series',
   PersistMovie = 'persist-movie',
+  EpisodeWatched = 'episode-watched',
+  EpisodeUnwatched = 'episode-unwatched',
+  RemoveSeries = 'remove-series',
+  RefreshState = 'refresh-state',
 };
 
 export enum MediaType {
@@ -11,6 +15,7 @@ export enum MediaType {
 export type Progress = {
   current: number;
   total: number;
+  finished: boolean;
 };
 
 export type Movie = {

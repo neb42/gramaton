@@ -1,19 +1,6 @@
 import * as React from 'react';
 
-import { MediaType, Series, Movie, StorageCache, Media } from '../types';
-
-// export type State = {
-//   series: Series[];
-//   movies: Movie[];
-// } & ({
-//   mediaType: MediaType.Movies;
-//   selectedMedia: Movie | null;
-//   selectMedia: (media: Movie) => void;
-// } | {
-//   mediaType: MediaType.Series;
-//   selectedMedia: Series | null;
-//   selectMedia: (media: Series) => void;
-// });
+import { MediaType, Series, Movie, StorageCache, Media, MessageType } from '../types';
 
 export type State = {
   series: Series[];
@@ -77,7 +64,7 @@ export const State = ({ children }: any) => {
   const [movies, setMovies] = React.useState<Movie[]>([]);
   const [selectedMedia, setSelectedMedia] = React.useState<Media | null>(null);
 
-  React.useEffect(() => {
+  const loadFromStorage = React.useCallback(() => {
     chrome.storage.sync.get((storageCache) => {
       const [series, movies] = Object.entries(storageCache).reduce<[Series[], Movie[]]>((acc, [key, value]) => {
         const [mediaType, slug] = key.split('/');
@@ -99,6 +86,29 @@ export const State = ({ children }: any) => {
       setMovies(movies);
     });
   }, []);
+
+  React.useEffect(() => {
+   loadFromStorage(); 
+   chrome.runtime.onMessage.addListener((message) => {
+      if (message.type === MessageType.RefreshState) {
+        loadFromStorage();
+      }
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (selectedMedia) {
+      if (selectedMedia.type === MediaType.Series) {
+        const s = series.find((s) => s.url === selectedMedia.url);
+        if (s) setSelectedMedia(s);
+        else setSelectedMedia(null);
+      } else if (selectedMedia.type === MediaType.Movies) {
+        const m = movies.find((m) => m.url === selectedMedia.url);
+        if (m) setSelectedMedia(m);
+        else setSelectedMedia(null);
+      }
+    }
+  }, [JSON.stringify(series), JSON.stringify(movies)]);
 
   return (
     <StateProvider value={{

@@ -1,11 +1,6 @@
 .series-panel {
   flex: 1;
   height: 100%;
-
-  & h2 {
-    margin: 0;
-    padding: 0.5rem;
-  }
 }
 
 .series-list {
@@ -19,6 +14,7 @@
   border-bottom: 1px solid #fff;
   cursor: pointer;
   color: rgba(255,255,255,.7);
+  transition: all 0.2s ease-in-out;
 
   &:hover {
     background-color: #298eea;

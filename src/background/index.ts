@@ -1,21 +1,40 @@
-import { MediaType, MessageType } from "../types";
+import { MessageType } from "../types";
+import { episodeUnwatched } from "./episodeUnwatched";
+import { episodeWatched } from "./episodeWatched";
+import { persistSeries } from "./persistSeries";
+import { removeSeries } from "./removeSeries";
 
-const getSlug = (url: string): string => url.split('?')[0].split('/')[4];
+const refreshState = async () => {
+  await chrome.runtime.sendMessage({ type: MessageType.RefreshState });
+};
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  console.log('[Background] Message: ', message)
   switch (message.type) {
     case MessageType.PersistSeries: { 
       const { series, currentSeason, currentEpisode, currentTime, duration } = message.payload;
       if (!series || !currentSeason || !currentEpisode || !currentTime || !duration) return true;
-      if (currentTime < 10) return true;
-      const newProgress = {
-        current: currentTime,
-        total: duration,
-      };
-      series.episodes[currentSeason - 1][currentEpisode - 1].progress = newProgress;
-      series.lastWatched = [currentSeason, currentEpisode];
-      await chrome.storage.sync.set({ [`${MediaType.Series}/${getSlug(series.url)}`]: series });
+      await persistSeries(series, currentSeason, currentEpisode, currentTime, duration);
+      return true;
+    }
+    case MessageType.EpisodeUnwatched: {
+      const { series, season, episode } = message.payload;
+      if (!series || !season || !episode) return true;
+      await episodeUnwatched(series, season, episode);
+      await refreshState();
+      return true;
+    }
+    case MessageType.EpisodeWatched: {
+      const { series, season, episode } = message.payload;
+      if (!series || !season || !episode) return true;
+      await episodeWatched(series, season, episode);
+      await refreshState();
+      return true;
+    }
+    case MessageType.RemoveSeries: {
+      const { series } = message.payload;
+      if (!series) return true;
+      await removeSeries(series);
+      await refreshState();
       return true;
     }
     default:

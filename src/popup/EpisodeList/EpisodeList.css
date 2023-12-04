@@ -1,13 +1,6 @@
 .episode-panel {
   flex: 2;
   border-left: 1px solid #fff;
-
-  & h2 {
-    margin: 0;
-    padding: 0.5rem;
-  }
-
-  border-right: 1px solid #ddd;
 }
 
 .episode-list {
@@ -24,6 +17,8 @@
 
   display: flex;
   flex-direction: column;
+  gap: 0.1rem;
+  transition: all 0.2s ease-in-out;
 
   &:hover {
     background-color: #298eea;
@@ -44,4 +39,74 @@
   font-style: italic;
   font-size: 0.8rem;
   color: rgba(255,255,255,.5);
+}
+
+.episode-progress-100 {
+  font-style: italic;
+  font-size: 0.8rem;
+  color: #0ce44aad;
+}
+
+.episode-list-item-buttons {
+  list-style: none;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  color: rgba(255,255,255,.7);
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  & a {
+    color: rgba(255,255,255,.7);
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+}
+
+.episode-list-item-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start; 
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+
+  visibility: hidden;
+  
+  & button {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    border-radius: 0.2rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      background-color: #fff;
+      color: #000;
+    }
+  }
+}
+
+.episode-list-item:hover .episode-list-item-actions {
+  visibility: visible;
+}
+
+.remove-series {
+  width: 100%;
+  background-color: #e12020;
+  cursor: pointer;
+  margin-top: 1rem;
+  color: #fff;
+
+  &:hover {
+    background-color: #ff0000;
+  }
 }

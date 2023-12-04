@@ -47,7 +47,6 @@ export class SeriesWatcher extends BaseWatcher {
             if (mutation.addedNodes.length > 0) {
               mutation.addedNodes.forEach((node) => {
                 if (node instanceof HTMLVideoElement) {
-                  console.log('video element found');
                   // this.initEpisode();
                 }
               });
@@ -56,7 +55,6 @@ export class SeriesWatcher extends BaseWatcher {
           }
           case 'attributes': {
             if (mutation.target instanceof HTMLVideoElement && mutation.attributeName === 'src') {
-              console.log('video element changed');
               this.initEpisode();
             }
             break;
@@ -70,15 +68,8 @@ export class SeriesWatcher extends BaseWatcher {
     const getVideoContainer = (): HTMLDivElement | null => {
       return document.getElementById('video') as HTMLDivElement;
     };
-    let videoContainer = getVideoContainer();
-    // while (!videoContainer) {
-    //   console.log('Waiting for video container')
-    //   await new Promise((resolve) => setTimeout(resolve, 1000));
-    //   videoContainer = getVideoContainer();
-    // }
-  
+    const videoContainer = getVideoContainer();
     if (videoContainer) {
-      console.log('Start observing video container')
       observer.observe(videoContainer, {
         childList: true,
         attributes: true,
@@ -104,7 +95,6 @@ export class SeriesWatcher extends BaseWatcher {
     const newSeason = this.getCurrentSeason();
     const newEpisode = this.getCurrentEpisode();
 
-    console.log(`[Content] New Season: ${newSeason} New Episode: ${newEpisode}`)
     if (newSeason !== this.currentSeason || newEpisode !== this.currentEpisode) {
       await this.persistProgress();
       this.currentSeason = newSeason;
@@ -120,21 +110,28 @@ export class SeriesWatcher extends BaseWatcher {
   };
 
   private persistProgress = async () => {
-    console.log(`[Content] Persisting Season ${this.currentSeason} Episode ${this.currentEpisode} Progress ${this.currentTime} / ${this.duration}`);
-    if (this.currentTime < 10) return;
-    const newProgress = {
-      current: this.currentTime,
-      total: this.duration,
-    };
-    this.series.episodes[this.currentSeason - 1][this.currentEpisode - 1].progress = newProgress;
-    this.series.lastWatched = [this.currentSeason, this.currentEpisode];
-    await this.setToCache(MediaType.Series, this.slug, this.series);
-    console.log(`[Content] Persisted Season ${this.currentSeason} Episode ${this.currentEpisode} Progress: `, newProgress)
+    chrome.runtime.sendMessage({
+      type: MessageType.PersistSeries, 
+      payload: {
+        series: this.series,
+        currentSeason: this.currentSeason,
+        currentEpisode: this.currentEpisode,
+        currentTime: this.currentTime,
+        duration: this.duration,
+      },
+    });
+    // if (this.currentTime < 10) return;
+    // const newProgress = {
+    //   current: this.currentTime,
+    //   total: this.duration,
+    // };
+    // this.series.episodes[this.currentSeason - 1][this.currentEpisode - 1].progress = newProgress;
+    // this.series.lastWatched = [this.currentSeason, this.currentEpisode];
+    // await this.setToCache(MediaType.Series, this.slug, this.series);
   };
 
   private handleTimeUpdate = (event: Event) => {
     this.currentTime = (event.target as HTMLVideoElement).currentTime;
-    console.log('[Content] ', this.currentTime);
   };
 
   private handleDurationChange = (event: Event) => {
@@ -171,6 +168,7 @@ export class SeriesWatcher extends BaseWatcher {
             progress: {
               current: 0,
               total: 0,
+              finished: false,
             },
           };
         })
@@ -190,7 +188,6 @@ export class SeriesWatcher extends BaseWatcher {
   };
   
   private mergeSeries = (seriesInCache: Series, parsedSeries: Series): Series => {
-    console.log('seriesInCache', seriesInCache)
     const mergedEpisodes = parsedSeries.episodes.map((season, seasonIndex) => {
       return season.map((episode, episodeIndex) => {
         const episodeInCache = seriesInCache.episodes[seasonIndex]?.[episodeIndex];
