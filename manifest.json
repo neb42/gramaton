@@ -9,8 +9,6 @@
     "128": "public/images/icon-128.png"
   },
   "permissions": [
-    "tabs",
-    "activeTab",
     "storage"
   ],
   "content_scripts": [
