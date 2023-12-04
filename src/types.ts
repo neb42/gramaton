@@ -1,4 +1,5 @@
 export enum MessageType {
+  Init = 'init',
   PersistSeries = 'persist-series',
   PersistMovie = 'persist-movie',
   EpisodeWatched = 'episode-watched',

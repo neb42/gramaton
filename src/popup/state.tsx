@@ -88,7 +88,10 @@ export const State = ({ children }: any) => {
   }, []);
 
   React.useEffect(() => {
-   loadFromStorage(); 
+    chrome.runtime.sendMessage({ type: MessageType.Init });
+  }, []);
+
+  React.useEffect(() => {
    chrome.runtime.onMessage.addListener((message) => {
       if (message.type === MessageType.RefreshState) {
         loadFromStorage();

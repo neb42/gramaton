@@ -1,5 +1,5 @@
 import { SeriesWatcher } from './series';
-import { MediaType } from '../types';
+import { MediaType, MessageType } from '../types';
 
 const urlBlacklist = [
   'https://gramaton.io/series',
@@ -13,6 +13,8 @@ const main = async () => {
   const url = window.location.href;
 
   if (urlBlacklist.includes(url.split('?')[0])) return;
+
+  await chrome.runtime.sendMessage({ type: MessageType.Init });
 
   const mediaType = getMediaType(url);
 
