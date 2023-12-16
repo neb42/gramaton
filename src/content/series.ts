@@ -15,6 +15,9 @@ export class SeriesWatcher extends BaseWatcher {
     const videoElement = document.querySelector('video.jw-video');
     if (!videoElement) return;
     videoElement.scrollIntoView();
+
+    const urlWithoutQS = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, '', urlWithoutQS);
   };
 
   private currentSeason: number = 0;
