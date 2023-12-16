@@ -154,7 +154,8 @@ export class SeriesWatcher extends BaseWatcher {
     const seasons = [...document.querySelectorAll('.tv-details-seasons li')]
       .map((li) => li.getAttribute('data-season'))
       .filter((s): s is string => s !== null && Number(s) > 0)
-      .sort();
+      .map(s => Number(s))
+      .sort((a, b) => a - b);
   
     const episodes = seasons.map((season) => {
       return [...document.querySelectorAll(`.tv-details-episodes ol[id="season${season}"] li`)]
@@ -173,7 +174,7 @@ export class SeriesWatcher extends BaseWatcher {
           };
         })
         .filter((s) => s.episode > 0)
-        .sort();
+        .sort((a, b) => a.episode - b.episode);
     });
   
     const title = document.querySelector('.movie-info h1')?.textContent ?? 'Unknown';
