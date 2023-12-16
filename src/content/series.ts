@@ -107,6 +107,7 @@ export class SeriesWatcher extends BaseWatcher {
     this.duration = videoElement.duration;
     videoElement.addEventListener('timeupdate', this.handleTimeUpdate);
     videoElement.addEventListener('durationchange', this.handleDurationChange);
+    videoElement.addEventListener('pause', this.persistProgress);
   };
 
   private persistProgress = async () => {
