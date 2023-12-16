@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { MediaType, Series, Movie, StorageCache, Media, MessageType } from '../types';
+import { getStorage } from "../storage";
+import { MediaType, Series, Movie, Media, MessageType } from '../types';
 
 export type State = {
   series: Series[];
@@ -65,7 +66,7 @@ export const State = ({ children }: any) => {
   const [selectedMedia, setSelectedMedia] = React.useState<Media | null>(null);
 
   const loadFromStorage = React.useCallback(() => {
-    chrome.storage.sync.get((storageCache) => {
+    getStorage().get((storageCache) => {
       const [series, movies] = Object.entries(storageCache).reduce<[Series[], Movie[]]>((acc, [key, value]) => {
         const [mediaType, slug] = key.split('/');
         if (!slug) return acc;

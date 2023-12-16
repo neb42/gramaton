@@ -1,3 +1,4 @@
+import { getStorage } from '../storage'; 
 import { MediaType, Media, Movie, Series } from '../types';
 
 export class BaseWatcher {
@@ -16,7 +17,7 @@ export class BaseWatcher {
     (mediaType: MediaType.Series, slug: string): Promise<Series | null>;
   } = async (mediaType: MediaType, slug: string): Promise<any | null> => {
     const key = `${mediaType}/${slug}`;
-    const storageCache = await chrome.storage.sync.get(key);
+    const storageCache = await getStorage().get(key);
     if (!storageCache || Object.keys(storageCache).length === 0) return null;
     const media = storageCache[key];
     if (!media || Object.keys(media).length === 0) return null;
@@ -28,10 +29,7 @@ export class BaseWatcher {
     (mediaType: MediaType.Series, slug: string, series: Series): Promise<void>;
   } = async (mediaType: MediaType, slug: string, media: Media): Promise<void> => {
     const key = `${mediaType}/${slug}`;
-    // const storageCache = await chrome.storage.sync.get();
-    // log number of bytes in media
-    console.log('bytes', JSON.stringify(media).length);
-    await chrome.storage.sync.set({ [key]: media });
+    await getStorage().set({ [key]: media });
   };
 
   protected getVideoElement = (): HTMLVideoElement | null => {

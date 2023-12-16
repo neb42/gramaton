@@ -1,7 +1,11 @@
+import { getStorage } from "../storage";
+
 const migrations: Record<string, () => Promise<void>> = {}
 
 export const migrateData = async () => {
-  const currentDataVersion = (await chrome.storage.sync.get('__version__'))['__version__'];
+  const storage = getStorage();
+
+  const currentDataVersion = (await storage.get('__version__'))['__version__'];
   const manifestVersion = chrome.runtime.getManifest().version;
 
   console.log('currentDataVersion', currentDataVersion);
@@ -10,7 +14,7 @@ export const migrateData = async () => {
   if (currentDataVersion === manifestVersion) return;
 
   if (currentDataVersion === undefined) {
-    await chrome.storage.sync.set({ '__version__': manifestVersion });
+    await storage.set({ '__version__': manifestVersion });
     return;
   }
 
@@ -18,6 +22,6 @@ export const migrateData = async () => {
   for (const version of migrationsToRun) {
     console.log('running migration', version);
     await migrations[version]();
-    await chrome.storage.sync.set({ '__version__': version });
+    await storage.set({ '__version__': version });
   }
 };

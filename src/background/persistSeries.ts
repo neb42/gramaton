@@ -1,3 +1,4 @@
+import { getStorage } from "../storage";
 import { MediaType, Series } from "../types";
 import { getSlug } from "./utils";
 
@@ -17,5 +18,5 @@ export const persistSeries = async (
   };
   series.episodes[currentSeason - 1][currentEpisode - 1].progress = newProgress;
   series.lastWatched = [currentSeason, currentEpisode];
-  await chrome.storage.sync.set({ [`${MediaType.Series}/${getSlug(series.url)}`]: series });
+  await getStorage().set({ [`${MediaType.Series}/${getSlug(series.url)}`]: series });
 };

@@ -1,3 +1,4 @@
+import { getStorage } from "../storage";
 import { Series } from "../types";
 import { getSlug } from "./utils";
 
@@ -15,5 +16,6 @@ export const episodeWatched = async (
     finished: true,
   };
   series.episodes[season - 1][episode - 1].progress = newProgress;
-  await chrome.storage.sync.set({ [key]: series });
+  series.lastWatched = [season, episode];
+  await getStorage().set({ [key]: series });
 };
