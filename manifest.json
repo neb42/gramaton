@@ -1,7 +1,7 @@
 {
   "name": "gramaton.io - Currently watching",
   "description": "Netflix style currently watching for gramaton.io",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "manifest_version": 3,
   "icons": {
     "16": "public/images/icon-16.png",
